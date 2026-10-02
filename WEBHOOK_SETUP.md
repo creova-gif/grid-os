@@ -314,10 +314,10 @@ if (!isValid) {
 ### 2. Store SECRET_KEY Securely
 ```bash
 # ✅ CORRECT - Environment variable
-CLICKPESA_SECRET_KEY=sk_live_XXXXXXXXXXXXXXXX
+CLICKPESA_SECRET_KEY=sk_live_xxx
 
 # ❌ WRONG - Hardcoded in code
-const SECRET_KEY = "sk_live_XXXXXXXXXXXXXXXX";
+const SECRET_KEY = "sk_live_xxx";
 ```
 
 ### 3. Use HTTPS Only
