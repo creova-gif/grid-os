@@ -13,9 +13,20 @@
 
 // ClickPesa API Configuration
 const CLICKPESA_API_URL = 'https://api.clickpesa.com/v1';
-const CLICKPESA_API_KEY = Deno.env.get('CLICKPESA_API_KEY') || '';
-const CLICKPESA_SECRET_KEY = Deno.env.get('CLICKPESA_SECRET_KEY') || '';
-const CLICKPESA_MERCHANT_ID = Deno.env.get('CLICKPESA_MERCHANT_ID') || '';
+
+/**
+ * Names of server-side env vars that are unset or blank.
+ * Returns a clear error, or null when every name is set.
+ * Never read these from VITE_ / NEXT_PUBLIC_ (those are client bundles).
+ */
+export function missingEnv(names: string[]): string | null {
+  const missing = names.filter((name) => {
+    const value = Deno.env.get(name);
+    return value == null || value.trim() === '';
+  });
+  if (missing.length === 0) return null;
+  return `Missing required environment variable(s): ${missing.join(', ')}`;
+}
 
 export interface PaymentRequest {
   amount: number;
@@ -43,14 +54,22 @@ export async function initiatePayment(request: PaymentRequest): Promise<PaymentR
   try {
     console.log(`[ClickPesa] Initiating payment: ${request.reference} - ${request.amount} ${request.currency} via ${request.provider}`);
 
-    // Validate required credentials
-    if (!CLICKPESA_API_KEY || !CLICKPESA_SECRET_KEY || !CLICKPESA_MERCHANT_ID) {
-      console.error('[ClickPesa] Missing API credentials');
+    const missingCredentials = missingEnv([
+      'CLICKPESA_API_KEY',
+      'CLICKPESA_SECRET_KEY',
+      'CLICKPESA_MERCHANT_ID',
+    ]);
+    if (missingCredentials) {
+      console.error(`[ClickPesa] ${missingCredentials}`);
       return {
         success: false,
-        error: 'ClickPesa API credentials not configured. Please set CLICKPESA_API_KEY, CLICKPESA_SECRET_KEY, and CLICKPESA_MERCHANT_ID environment variables.'
+        error: missingCredentials
       };
     }
+
+    const apiKey = Deno.env.get('CLICKPESA_API_KEY') as string;
+    const secretKey = Deno.env.get('CLICKPESA_SECRET_KEY') as string;
+    const merchantId = Deno.env.get('CLICKPESA_MERCHANT_ID') as string;
 
     // Validate phone number format (Tanzania: +255...)
     const phoneRegex = /^(\+255|0)[67]\d{8}$/;
@@ -68,7 +87,7 @@ export async function initiatePayment(request: PaymentRequest): Promise<PaymentR
 
     // Prepare ClickPesa API request
     const payload = {
-      merchant_id: CLICKPESA_MERCHANT_ID,
+      merchant_id: merchantId,
       amount: request.amount,
       currency: request.currency,
       phone: normalizedPhone,
@@ -80,14 +99,14 @@ export async function initiatePayment(request: PaymentRequest): Promise<PaymentR
     };
 
     // Generate HMAC signature for API authentication
-    const signature = await generateSignature(payload, CLICKPESA_SECRET_KEY);
+    const signature = await generateSignature(payload, secretKey);
 
     // Make API request
     const response = await fetch(`${CLICKPESA_API_URL}/payments/init`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${CLICKPESA_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'X-Signature': signature
       },
       body: JSON.stringify(payload)
@@ -129,7 +148,14 @@ export async function verifyWebhookSignature(
   receivedSignature: string
 ): Promise<boolean> {
   try {
-    const expectedSignature = await generateSignature(payload, CLICKPESA_SECRET_KEY);
+    const missingSecret = missingEnv(['CLICKPESA_SECRET_KEY']);
+    if (missingSecret) {
+      console.error(`[ClickPesa] ${missingSecret}`);
+      return false;
+    }
+
+    const secretKey = Deno.env.get('CLICKPESA_SECRET_KEY') as string;
+    const expectedSignature = await generateSignature(payload, secretKey);
     return expectedSignature === receivedSignature;
   } catch (error) {
     console.error('[ClickPesa] Signature verification error:', error);
@@ -178,17 +204,19 @@ async function generateSignature(payload: any, secretKey: string): Promise<strin
  */
 export async function checkPaymentStatus(transactionId: string): Promise<PaymentResponse> {
   try {
-    if (!CLICKPESA_API_KEY) {
+    const missingKey = missingEnv(['CLICKPESA_API_KEY']);
+    if (missingKey) {
       return {
         success: false,
-        error: 'ClickPesa API credentials not configured'
+        error: missingKey
       };
     }
 
+    const apiKey = Deno.env.get('CLICKPESA_API_KEY') as string;
     const response = await fetch(`${CLICKPESA_API_URL}/payments/${transactionId}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${CLICKPESA_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       }
     });
