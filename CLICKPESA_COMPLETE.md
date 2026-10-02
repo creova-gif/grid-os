@@ -162,7 +162,6 @@ Normalized: +255712345678 (international format)
 cp .env.example .env
 
 # Add ClickPesa test credentials
-STRIPE_SECRET_KEY=sk_test_xxx
 CLICKPESA_API_KEY=pk_test_xxx
 CLICKPESA_SECRET_KEY=your_clickpesa_test_secret
 CLICKPESA_MERCHANT_ID=your_test_merchant_id
