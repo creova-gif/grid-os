@@ -1,5 +1,7 @@
 # Environment variables - MOST IMPORTANT FOR SECURITY
 .env
+.env.*
+!.env.example
 .env.local
 .env.*.local
 

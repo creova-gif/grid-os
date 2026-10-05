@@ -162,9 +162,9 @@ Normalized: +255712345678 (international format)
 cp .env.example .env
 
 # Add ClickPesa test credentials
-CLICKPESA_API_KEY=pk_test_XXXXXXXXXXXXXXXX
-CLICKPESA_SECRET_KEY=sk_test_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CLICKPESA_MERCHANT_ID=MCH_TEST_XXXXX
+CLICKPESA_API_KEY=pk_test_xxx
+CLICKPESA_SECRET_KEY=your_clickpesa_test_secret
+CLICKPESA_MERCHANT_ID=your_test_merchant_id
 ```
 
 ### Step 2: Access Payment Test Page

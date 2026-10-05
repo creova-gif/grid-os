@@ -155,20 +155,20 @@ Tanzania phone numbers validated:
 
 ### Step 2: Configure Environment Variables
 
-Add to `.env` file:
+Set these in the hosting environment. Do not commit real values. Server-side secrets must not use a `VITE_` or `NEXT_PUBLIC_` prefix (those are inlined into the client bundle).
 
 ```bash
-# ClickPesa Payment Gateway
-CLICKPESA_API_KEY=pk_live_XXXXXXXXXXXXXXXX
-CLICKPESA_SECRET_KEY=sk_live_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CLICKPESA_MERCHANT_ID=MCH_XXXXX
+# ClickPesa Payment Gateway. Supabase Edge Function secrets (server-side only).
+CLICKPESA_API_KEY=pk_test_xxx
+CLICKPESA_SECRET_KEY=your_clickpesa_secret_key
+CLICKPESA_MERCHANT_ID=your_merchant_id
 ```
 
 **⚠️ IMPORTANT:** Use **test credentials** for development:
 ```bash
-CLICKPESA_API_KEY=pk_test_XXXXXXXXXXXXXXXX
-CLICKPESA_SECRET_KEY=sk_test_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-CLICKPESA_MERCHANT_ID=MCH_TEST_XXXXX
+CLICKPESA_API_KEY=pk_test_xxx
+CLICKPESA_SECRET_KEY=your_clickpesa_test_secret
+CLICKPESA_MERCHANT_ID=your_test_merchant_id
 ```
 
 ### Step 3: Test Payment Flow
