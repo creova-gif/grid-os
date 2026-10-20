@@ -88,7 +88,7 @@ export function createSimulator(): SimulatorState {
       voltage: 230,
       tamper: false,
       rssi: -70,
-      connected: true,
+      connected: m.balance > 0,
     })),
     alerts: [],
     tick: 0,

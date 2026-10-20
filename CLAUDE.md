@@ -10,7 +10,10 @@ This repo's Supabase client originally referenced legacy project ID `ohswllmovmr
 React, Vite, TypeScript, Tailwind CSS, Supabase client (environment-variable driven).
 
 ## CI
-Branch pipeline runs `pnpm install --frozen-lockfile && pnpm run build` via GitHub Actions (`.github/workflows/ci-validate.yml`).
+Branch pipeline runs `pnpm install --frozen-lockfile && pnpm run test && pnpm run build` via GitHub Actions (`.github/workflows/ci-validate.yml`).
+
+## Testing
+Run unit tests locally with `pnpm run test` (powered by Vitest). Tests cover local telemetry simulation, API resilience, and offline field agent payment/lookup logic.
 
 ## AI Agent Rules
 - Do not assume the Supabase connection works. Verify before building any feature that depends on it.
