@@ -122,6 +122,18 @@ export async function initiatePayment(request: PaymentRequest): Promise<PaymentR
 }
 
 /**
+ * Constant-time string comparison to prevent timing attacks
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/**
  * Verify webhook signature to ensure request is from ClickPesa
  */
 export async function verifyWebhookSignature(
@@ -129,8 +141,13 @@ export async function verifyWebhookSignature(
   receivedSignature: string
 ): Promise<boolean> {
   try {
+    if (!CLICKPESA_SECRET_KEY || !receivedSignature) {
+      console.error('[ClickPesa Webhook] Missing secret key or signature for verification');
+      return false;
+    }
+
     const expectedSignature = await generateSignature(payload, CLICKPESA_SECRET_KEY);
-    return expectedSignature === receivedSignature;
+    return timingSafeEqual(expectedSignature.toLowerCase(), receivedSignature.toLowerCase().trim());
   } catch (error) {
     console.error('[ClickPesa] Signature verification error:', error);
     return false;

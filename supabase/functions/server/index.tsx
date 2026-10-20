@@ -527,7 +527,7 @@ app.post("/make-server-4719aee2/payments/clickpesa/initiate", async (c) => {
 app.post("/make-server-4719aee2/webhooks/clickpesa/callback", async (c) => {
   try {
     const body = await c.req.json();
-    const signature = c.req.header('X-Signature') || '';
+    const signature = c.req.header('X-Signature') || c.req.header('X-ClickPesa-Signature') || '';
 
     console.log('[ClickPesa Webhook] Received callback:', {
       reference: body.reference,

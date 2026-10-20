@@ -1,5 +1,5 @@
 {
-  "name": "@figma/my-make-file",
+  "name": "gridos-platform",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -57,6 +57,8 @@
     "motion": "12.23.24",
     "mqtt": "^5.15.0",
     "next-themes": "0.4.6",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-day-picker": "8.10.1",
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
@@ -75,25 +77,12 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
+    "@types/node": "^22.13.10",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "4.7.0",
     "tailwindcss": "4.3.3",
+    "typescript": "^5.7.3",
     "vite": "6.3.5"
-  },
-  "peerDependencies": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "react-dom": {
-      "optional": true
-    }
-  },
-  "pnpm": {
-    "overrides": {
-      "vite": "6.3.5"
-    }
   }
 }

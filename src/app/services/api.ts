@@ -98,9 +98,75 @@ export const planningApi = {
   getSites: () => api.get('/api/planning/sites'),
 };
 
+// Mock fallback data for offline / simulator mode
+const MOCK_PORTFOLIO = {
+  totals: {
+    sites: 4,
+    total_customers: 248,
+    total_revenue_usd_mo: 14250,
+  },
+  sites: [
+    {
+      name: 'Ukerewe Island — Nansio Feeder',
+      region: 'Lake Victoria, Mwanza',
+      capacity_kw: 50,
+      health_score: 94,
+      meters_total: 10,
+      active_customers: 10,
+      monthly_revenue_tzs: 4120000,
+      monthly_revenue_usd: 1615,
+      unresolved_alerts: 0,
+      health_status: 'healthy',
+    },
+    {
+      name: 'Bwiro Solar Hub',
+      region: 'Ukerewe District',
+      capacity_kw: 35,
+      health_score: 88,
+      meters_total: 64,
+      active_customers: 58,
+      monthly_revenue_tzs: 3200000,
+      monthly_revenue_usd: 1250,
+      unresolved_alerts: 1,
+      health_status: 'healthy',
+    },
+    {
+      name: 'Bukindo Mini-Grid',
+      region: 'Ukerewe North',
+      capacity_kw: 80,
+      health_score: 72,
+      meters_total: 112,
+      active_customers: 94,
+      monthly_revenue_tzs: 7800000,
+      monthly_revenue_usd: 3050,
+      unresolved_alerts: 3,
+      health_status: 'attention',
+    },
+    {
+      name: 'Kagunga Lakeshore Feeder',
+      region: 'Kigoma Rural',
+      capacity_kw: 120,
+      health_score: 96,
+      meters_total: 185,
+      active_customers: 178,
+      monthly_revenue_tzs: 14200000,
+      monthly_revenue_usd: 5560,
+      unresolved_alerts: 0,
+      health_status: 'healthy',
+    },
+  ],
+};
+
 // Portfolio API
 export const portfolioApi = {
-  getByOperator: (operatorId: string) => api.get(`/api/portfolio/${operatorId}`),
+  getByOperator: async (operatorId: string) => {
+    try {
+      const res = await api.get(`/api/portfolio/${operatorId}`, { timeout: 3000 });
+      return res;
+    } catch {
+      return { data: MOCK_PORTFOLIO };
+    }
+  },
 };
 
 // Fintech API
@@ -138,5 +204,17 @@ export const ussdApi = {
 
 // Health check
 export const healthCheck = () => api.get('/health');
+
+/**
+ * Lightweight health check helper returning boolean
+ */
+export const checkApiHealth = async (): Promise<boolean> => {
+  try {
+    const res = await api.get('/health', { timeout: 2500 });
+    return res.status === 200;
+  } catch {
+    return false;
+  }
+};
 
 export default api;
