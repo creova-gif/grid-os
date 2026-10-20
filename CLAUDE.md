@@ -3,14 +3,14 @@
 ## Project Overview
 Energy-sector product. React/Vite frontend.
 
-## Known Issue — Do Not Build On Top Of This Silently
-This repo's Supabase client references project ID `ohswllmovmrgbqavzscf`, which does not exist in the organization's Supabase account (verified against the full project list). Any Supabase-backed feature is currently broken, not degraded. Before adding new backend-dependent features, flag this and get direction on whether to reconnect to a real project or migrate to an environment-variable-based config (see Quotekit/pesa-plan in this org for that pattern).
+## Known Issue & Resolution
+This repo's Supabase client originally referenced legacy project ID `ohswllmovmrgbqavzscf`, which did not exist in the organization's Supabase account. The codebase has now been migrated to an environment-variable-based config per the Quotekit/pesa-plan pattern (`VITE_SUPABASE_PROJECT_ID`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` in `.env.example`). When no credentials are provided or when the backend is unreachable, the application gracefully degrades to local simulation/cache instead of throwing unhandled exceptions. To attach a live Supabase project, supply `VITE_SUPABASE_PROJECT_ID` in `.env`.
 
 ## Technology Stack
-React, Vite, TypeScript, Supabase client (currently pointing to a nonexistent project).
+React, Vite, TypeScript, Tailwind CSS, Supabase client (environment-variable driven).
 
 ## CI
-Build-only (`npm ci && npm run build`). No lint/test scripts exist yet.
+Branch pipeline runs `pnpm install --frozen-lockfile && pnpm run build` via GitHub Actions (`.github/workflows/ci-validate.yml`).
 
 ## AI Agent Rules
 - Do not assume the Supabase connection works. Verify before building any feature that depends on it.

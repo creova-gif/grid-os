@@ -3,11 +3,11 @@
  * Configure your Supabase project URL and anon key
  */
 import { createClient } from '@supabase/supabase-js';
+import { projectId, publicAnonKey } from '/utils/supabase/info';
 
-// Replace these with your actual Supabase project credentials
-// Get them from: https://app.supabase.com/project/_/settings/api
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+// Supabase project credentials (environment variable driven)
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || `https://${projectId}.supabase.co`;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || publicAnonKey;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
