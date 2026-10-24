@@ -8,11 +8,16 @@ import mqtt from 'mqtt';
 import { createSimulator, tickSimulator, convertToLiveDataFormat, SimulatorState } from '../utils/localSimulator';
 
 // MQTT Configuration
-const BROKER_URL = import.meta.env.VITE_MQTT_BROKER || 'wss://broker.hivemq.com:8884/mqtt';
+const BROKER_URL = import.meta.env.VITE_MQTT_BROKER || '';
+const MQTT_USERNAME = import.meta.env.VITE_MQTT_USERNAME || '';
+const MQTT_PASSWORD = import.meta.env.VITE_MQTT_PASSWORD || '';
 const SITE_ID = import.meta.env.VITE_SITE_ID || 'site-tz-001';
 const OPERATOR_ID = import.meta.env.VITE_OPERATOR_ID || 'op-jumeme-001';
 const TOPIC_PREFIX = import.meta.env.VITE_MQTT_TOPIC_PREFIX || 'gridios';
-const USE_LOCAL_SIMULATOR = import.meta.env.VITE_USE_LOCAL_SIMULATOR === 'true' || false;
+// If VITE_USE_LOCAL_SIMULATOR is explicitly specified, obey it; otherwise default to simulator if no broker configured
+const USE_LOCAL_SIMULATOR = import.meta.env.VITE_USE_LOCAL_SIMULATOR !== undefined
+  ? import.meta.env.VITE_USE_LOCAL_SIMULATOR === 'true'
+  : !BROKER_URL;
 
 export interface MeterStatus {
   meter_id: string;
@@ -108,6 +113,15 @@ export function LiveDataProvider({ children }: LiveDataProviderProps) {
       return () => clearInterval(intervalId);
     }
 
+    if (!BROKER_URL) {
+      console.warn('[MQTT] No broker configured. Falling back to local simulator.');
+      return;
+    }
+
+    if (BROKER_URL.includes('broker.hivemq.com')) {
+      console.warn('[Security Advisory] Connecting to public unauthenticated MQTT broker (hivemq.com). For production, configure an authenticated private broker (EMQX / AWS IoT Core / HiveMQ Cloud).');
+    }
+
     const clientId = `gridios-dash-${Math.random().toString(16).slice(2, 8)}`;
     
     const client = mqtt.connect(BROKER_URL, {
@@ -115,6 +129,8 @@ export function LiveDataProvider({ children }: LiveDataProviderProps) {
       clean: true,
       connectTimeout: 10000,
       reconnectPeriod: 5000,
+      ...(MQTT_USERNAME ? { username: MQTT_USERNAME } : {}),
+      ...(MQTT_PASSWORD ? { password: MQTT_PASSWORD } : {}),
     });
 
     client.on('connect', () => {

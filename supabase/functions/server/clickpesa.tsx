@@ -141,6 +141,18 @@ export async function initiatePayment(request: PaymentRequest): Promise<PaymentR
 }
 
 /**
+ * Constant-time string comparison to prevent timing attacks
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+/**
  * Verify webhook signature to ensure request is from ClickPesa
  */
 export async function verifyWebhookSignature(
@@ -149,14 +161,14 @@ export async function verifyWebhookSignature(
 ): Promise<boolean> {
   try {
     const missingSecret = missingEnv(['CLICKPESA_SECRET_KEY']);
-    if (missingSecret) {
-      console.error(`[ClickPesa] ${missingSecret}`);
+    if (missingSecret || !receivedSignature) {
+      console.error(`[ClickPesa Webhook] ${missingSecret ?? 'Missing signature for verification'}`);
       return false;
     }
 
     const secretKey = Deno.env.get('CLICKPESA_SECRET_KEY') as string;
     const expectedSignature = await generateSignature(payload, secretKey);
-    return expectedSignature === receivedSignature;
+    return timingSafeEqual(expectedSignature.toLowerCase(), receivedSignature.toLowerCase().trim());
   } catch (error) {
     console.error('[ClickPesa] Signature verification error:', error);
     return false;
