@@ -449,6 +449,12 @@ app.post("/make-server-4719aee2/payments/clickpesa/initiate", async (c) => {
       }, 400);
     }
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    if (!supabaseUrl || supabaseUrl.trim() === '') {
+      console.error('[Payment] Missing required environment variable: SUPABASE_URL');
+      return c.json({ error: 'Missing required environment variable: SUPABASE_URL' }, 500);
+    }
+
     // Get customer data
     const customer = await kv.get(`customer:${customerId}`);
     if (!customer) {
@@ -470,7 +476,7 @@ app.post("/make-server-4719aee2/payments/clickpesa/initiate", async (c) => {
       provider: provider.toLowerCase() as any,
       reference: reference,
       description: `GridOS Token Purchase - ${customer.name} (${customer.meterId})`,
-      callbackUrl: `${Deno.env.get('SUPABASE_URL')}/functions/v1/make-server-4719aee2/webhooks/clickpesa/callback`
+      callbackUrl: `${supabaseUrl}/functions/v1/make-server-4719aee2/webhooks/clickpesa/callback`
     };
 
     console.log(`[Payment] Initiating ClickPesa payment for customer ${customerId}: ${clickpesa.formatTZS(totalAmount)} via ${provider}`);
@@ -534,6 +540,12 @@ app.post("/make-server-4719aee2/webhooks/clickpesa/callback", async (c) => {
       status: body.status,
       amount: body.amount
     });
+
+    const missingSecret = clickpesa.missingEnv(['CLICKPESA_SECRET_KEY']);
+    if (missingSecret) {
+      console.error(`[ClickPesa Webhook] ${missingSecret}`);
+      return c.json({ error: missingSecret }, 500);
+    }
 
     // Verify webhook signature
     const isValid = await clickpesa.verifyWebhookSignature(body, signature);
